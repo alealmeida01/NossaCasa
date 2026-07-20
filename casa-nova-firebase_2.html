@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Casa Nova — Checklist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#1F1B18;
+    --panel:#28231F;
+    --tan:#C9A876;
+    --amber:#E8A33D;
+    --off:#F2EDE4;
+    --muted:#9A9088;
+    --have:#7A8B6F;
+    --need:#C1653D;
+    --line:#3A342E;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--off);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:32px 20px 80px;}
+
+  header{margin-bottom:28px;}
+  .kicker{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:.15em;
+    color:var(--amber);
+    text-transform:uppercase;
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(32px,6vw,48px);
+    margin:6px 0 4px;
+    letter-spacing:-.01em;
+  }
+  .sub{color:var(--muted);font-size:14px;max-width:520px;line-height:1.5;}
+
+  .overview{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin:24px 0 28px;
+  }
+  .stat{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:12px 16px;
+    min-width:110px;
+  }
+  .stat .n{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--amber);}
+  .stat .l{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;}
+
+  .tabs{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    border-bottom:1px solid var(--line);
+    padding-bottom:0;
+    margin-bottom:0;
+  }
+  .tab{
+    position:relative;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:10px 16px;
+    background:var(--panel);
+    border:1px dashed var(--line);
+    border-bottom:none;
+    border-radius:6px 6px 0 0;
+    color:var(--muted);
+    cursor:pointer;
+    letter-spacing:.02em;
+  }
+  .tab .count{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:11px;color:var(--muted);margin-left:6px;}
+  .tab.active{
+    color:var(--bg);
+    background:var(--amber);
+    border-color:var(--amber);
+  }
+  .tab.active .count{color:#3a2a0f;}
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:0 6px 6px 6px;
+    padding:22px;
+  }
+
+  .taperow{
+    height:6px;
+    background:var(--line);
+    border-radius:3px;
+    overflow:hidden;
+    margin-bottom:18px;
+  }
+  .tapefill{
+    height:100%;
+    background:linear-gradient(90deg,var(--have),#93a688);
+    transition:width .3s ease;
+  }
+  .progresslabel{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:6px;
+    display:flex;
+    justify-content:space-between;
+  }
+
+  .item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .item:last-child{border-bottom:none;}
+  .check{
+    width:20px;height:20px;
+    flex:none;
+    border:1.5px solid var(--muted);
+    border-radius:4px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    background:transparent;
+  }
+  .check.on{background:var(--have);border-color:var(--have);}
+  .check.on::after{content:'✓';color:var(--bg);font-size:13px;font-weight:700;}
+  .iname{
+    flex:1;
+    font-size:14.5px;
+  }
+  .iname.on{color:var(--have);}
+  .iname.off{color:var(--off);}
+  .price{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:4px;
+    color:var(--tan);
+    width:100px;
+    padding:5px 8px;
+    text-align:right;
+  }
+  .price:focus{outline:none;border-color:var(--amber);}
+  .price::placeholder{color:#5a5248;}
+  .del{
+    background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;
+    padding:2px 6px;
+    flex:none;
+  }
+  .del:hover{color:var(--need);}
+
+  .addrow{
+    display:flex;gap:8px;margin-top:16px;
+  }
+  .addrow input{
+    flex:1;
+    background:var(--bg);
+    border:1px solid var(--line);
+    border-radius:4px;
+    color:var(--off);
+    padding:9px 12px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+  }
+  .addrow input:focus{outline:none;border-color:var(--amber);}
+  .addbtn{
+    background:var(--amber);
+    color:var(--bg);
+    border:none;
+    border-radius:4px;
+    padding:0 18px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .addbtn:hover{filter:brightness(1.08);}
+
+  .empty{color:var(--muted);font-size:13px;padding:20px 0;text-align:center;font-family:'IBM Plex Mono',monospace;}
+  .loading{color:var(--muted);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:40px 0;text-align:center;}
+  .conferror{
+    background:#3a2420;border:1px solid var(--need);color:#f0c9b8;
+    border-radius:6px;padding:14px 16px;margin-bottom:20px;font-size:13px;line-height:1.6;
+  }
+  .conferror code{background:#241a17;padding:1px 5px;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Mudança · Planejamento</div>
+    <h1>Casa Nova</h1>
+    <p class="sub">O que já tem e o que falta comprar, cômodo por cômodo. Sincronizado em tempo real — os dois celulares veem a mesma lista.</p>
+  </header>
+
+  <div id="configWarning"></div>
+  <div class="overview" id="overview"></div>
+  <div class="tabs" id="tabs"></div>
+  <div class="panel" id="panel">
+    <div class="loading">carregando...</div>
+  </div>
+</div>
+
+<!-- Firebase SDK (via CDN, versão compat p/ simplicidade) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+<script>
+/* =========================================================
+   1) COLE AQUI a configuração do seu projeto Firebase.
+   Você pega isso em: Firebase Console > Configurações do projeto
+   > seus apps > Web app > "SDK setup and configuration".
+   ========================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyDu24L5kvroAcC5IhxYPDXzpss8oyo_U8k",
+  authDomain: "casanova-86ee1.firebaseapp.com",
+  projectId: "casanova-86ee1",
+  storageBucket: "casanova-86ee1.firebasestorage.app",
+  messagingSenderId: "644603879072",
+  appId: "1:644603879072:web:01ef73fa325087010473c5"
+};
+
+let db = null;
+let firebaseReady = false;
+
+try{
+  if(firebaseConfig.apiKey !== "COLE_AQUI"){
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    firebaseReady = true;
+  }
+}catch(e){
+  console.error("Erro ao iniciar Firebase:", e);
+}
+
+if(!firebaseReady){
+  document.getElementById('configWarning').innerHTML = `
+    <div class="conferror">
+      <strong>Firebase ainda não configurado.</strong><br>
+      Abra este arquivo, procure por <code>firebaseConfig</code> no final e cole as chaves
+      do seu projeto Firebase. Sem isso a lista não vai sincronizar entre celulares.
+    </div>`;
+}
+
+const ROOMS = ["Sala","Cozinha","Banheiro","Quarto","Escritório"];
+
+const DEFAULTS = {
+  "Sala": [
+    ["Sofá","1.200"],["Rack","1.200"],["TV","3.000"],
+    ["Tapete",""],["Quadros",""],["Porta-copos",""],["Mesinha",""]
+  ],
+  "Cozinha": [
+    ["Armário","2.000"],["Geladeira","3.000"],["Pia","300"],["Mesa","2.000"],
+    ["Fogão","700"],["Microondas","700"],
+    ["Air fryer",""],["Pipoqueira",""],["Chapa",""],["Panela elétrica",""],
+    ["Batedeira",""],["Kit panelas",""],["Kit copos",""],["Kit talheres",""],
+    ["Kit sobremesa",""],["Faqueiro",""],["Prato",""],["Pano de prato",""],
+    ["Porta tempero",""],["Escumadeira",""],["Filtro",""]
+  ],
+  "Banheiro": [
+    ["Pia","200"],["Armário","400"],["Box","1.000"],["Prateleira","300"],["Espelho","300"],
+    ["Gabinete",""],["Toalhas",""],["Porta-toalha",""],["Kit higiene",""],["Tapete",""]
+  ],
+  "Quarto": [
+    ["Cama","1.200"],["Guarda-roupa","1.500"],["TV","1.200"],["Rack","300"],
+    ["Travesseiro",""],["Lençol",""],["Coberta",""],["Tapete",""],["Led",""]
+  ],
+  "Escritório": []
+};
+
+let state = {};
+let activeRoom = "Sala";
+let unsubscribers = {};
+
+function makeId(){ return Math.random().toString(36).slice(2,9); }
+
+function roomDocRef(room){
+  return db.collection('casaNova').doc(room);
+}
+
+async function ensureSeeded(room){
+  const ref = roomDocRef(room);
+  const snap = await ref.get();
+  if(!snap.exists){
+    const items = DEFAULTS[room].map(([name,price])=>({id:makeId(),name,price,have:false}));
+    await ref.set({ items });
+  }
+}
+
+function listenRoom(room){
+  unsubscribers[room] = roomDocRef(room).onSnapshot(snap=>{
+    const data = snap.data();
+    state[room] = (data && data.items) ? data.items : [];
+    renderOverview();
+    renderTabs();
+    if(room === activeRoom) renderPanel();
+  });
+}
+
+async function saveRoom(room){
+  await roomDocRef(room).set({ items: state[room] });
+}
+
+function fmtCount(room){
+  const items = state[room] || [];
+  const have = items.filter(i=>i.have).length;
+  return {have, total: items.length};
+}
+
+function renderOverview(){
+  const el = document.getElementById('overview');
+  let totalHave=0, totalAll=0;
+  ROOMS.forEach(r=>{
+    const {have,total} = fmtCount(r);
+    totalHave += have; totalAll += total;
+  });
+  el.innerHTML = `
+    <div class="stat"><div class="n">${totalAll}</div><div class="l">itens no total</div></div>
+    <div class="stat"><div class="n">${totalHave}</div><div class="l">já tem</div></div>
+    <div class="stat"><div class="n">${totalAll-totalHave}</div><div class="l">falta comprar</div></div>
+  `;
+}
+
+function renderTabs(){
+  const el = document.getElementById('tabs');
+  el.innerHTML = ROOMS.map(r=>{
+    const {have,total} = fmtCount(r);
+    return `<button class="tab ${r===activeRoom?'active':''}" data-room="${r}">${r}<span class="count">${have}/${total}</span></button>`;
+  }).join('');
+  el.querySelectorAll('.tab').forEach(t=>{
+    t.addEventListener('click', ()=>{
+      activeRoom = t.dataset.room;
+      renderTabs();
+      renderPanel();
+    });
+  });
+}
+
+function renderPanel(){
+  const el = document.getElementById('panel');
+  const items = state[activeRoom] || [];
+  const {have,total} = fmtCount(activeRoom);
+  const pct = total ? Math.round((have/total)*100) : 0;
+
+  let itemsHtml = '';
+  if(items.length === 0){
+    itemsHtml = `<div class="empty">nenhum item ainda — adicione o primeiro abaixo</div>`;
+  } else {
+    itemsHtml = items.map(it=>`
+      <div class="item" data-id="${it.id}">
+        <button class="check ${it.have?'on':''}" data-action="toggle"></button>
+        <div class="iname ${it.have?'on':'off'}">${it.name}</div>
+        <input class="price" data-action="price" placeholder="R$" value="${it.price?('R$ '+it.price):''}">
+        <button class="del" data-action="del">✕</button>
+      </div>
+    `).join('');
+  }
+
+  el.innerHTML = `
+    <div class="progresslabel"><span>${activeRoom}</span><span>${pct}% completo</span></div>
+    <div class="taperow"><div class="tapefill" style="width:${pct}%"></div></div>
+    ${itemsHtml}
+    <div class="addrow">
+      <input type="text" id="newItemInput" placeholder="Adicionar item em ${activeRoom}...">
+      <button class="addbtn" id="addBtn">Adicionar</button>
+    </div>
+  `;
+
+  el.querySelectorAll('.item').forEach(row=>{
+    const id = row.dataset.id;
+    row.querySelector('[data-action="toggle"]').addEventListener('click', async ()=>{
+      const item = state[activeRoom].find(i=>i.id===id);
+      item.have = !item.have;
+      await saveRoom(activeRoom);
+    });
+    row.querySelector('[data-action="del"]').addEventListener('click', async ()=>{
+      state[activeRoom] = state[activeRoom].filter(i=>i.id!==id);
+      await saveRoom(activeRoom);
+    });
+    const priceInput = row.querySelector('[data-action="price"]');
+    priceInput.addEventListener('blur', async ()=>{
+      const item = state[activeRoom].find(i=>i.id===id);
+      item.price = priceInput.value.replace(/^R\$\s*/,'').trim();
+      await saveRoom(activeRoom);
+    });
+  });
+
+  document.getElementById('addBtn').addEventListener('click', addItem);
+  document.getElementById('newItemInput').addEventListener('keydown', (e)=>{
+    if(e.key==='Enter') addItem();
+  });
+}
+
+async function addItem(){
+  const input = document.getElementById('newItemInput');
+  const name = input.value.trim();
+  if(!name) return;
+  state[activeRoom].push({id:makeId(), name, price:'', have:false});
+  await saveRoom(activeRoom);
+}
+
+async function init(){
+  if(!firebaseReady){
+    // modo offline de demonstração, sem sincronizar
+    for(const r of ROOMS){
+      state[r] = DEFAULTS[r].map(([name,price])=>({id:makeId(),name,price,have:false}));
+    }
+    renderOverview();
+    renderTabs();
+    renderPanel();
+    return;
+  }
+  for(const r of ROOMS){
+    await ensureSeeded(r);
+    listenRoom(r);
+  }
+}
+
+init();
+</script>
+</body>
+</html>
